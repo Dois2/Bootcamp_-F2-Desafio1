@@ -1,47 +1,109 @@
-const express = require('express');
+const express = require("express");
 
 const server = express();
 
 server.use(express.json());
 
-const projects = [];
+const projects = [
+  {
+    id: "5",
+    title: "index1",
+    tasks: []
+  },
+  {
+    id: "5",
+    title: "index1",
+    tasks: []
+  },
+  {
+    id: "5",
+    title: "index1",
+    tasks: []
+  },
+  {
+    id: "5",
+    title: "index1",
+    tasks: []
+  },
+  {
+    id: "5",
+    title: "index1",
+    tasks: []
+  },
+  {
+    id: "2",
+    title: "index1",
+    tasks: []
+  }
+];
 
-server.post('/projects', (req,res) =>{
-    const {id, title} = req.body;
+var requisicoes = 0;
 
-    const project = {
-        id,
-        title,
-        tasks: []
+// Global Middlewares
+server.use((req, res, next) => {
+  requisicoes++;
+  console.log(`Esta é a ${requisicoes}º requisição nesta API!`);
+  next();
+});
+
+// Middlewares
+function verifyId(req, res, next) {
+  const { id } = req.params;
+  const index = projects.findIndex(project => project.id === id);
+  if (index !== -1) {
+    req.index = id;
+    next();
+  } else return res.status(400).send({ Error: "Projeto não encontrado" });
+}
+
+// Rotas
+
+server.post("/projects", (req, res) => {
+  const { id, title } = req.body;
+
+  const project = {
+    id,
+    title,
+    tasks: []
+  };
+
+  projects.push(project);
+
+  return res.json(projects);
+});
+
+server.post("/projects/:id/tasks", verifyId, (req, res) => {
+  const { title } = req.body;
+  const { id } = req.params;
+
+  const index = projects.findIndex(project => project.id === id);
+  projects[index].tasks.push(title);
+  return res.json(projects);
+});
+
+server.get("/projects", (req, res) => {
+  return res.json(projects);
+});
+
+server.put("/projects/:id", verifyId, (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
+
+  for (projeto of projects) {
+    if (projeto.id === id) {
+      projeto.title = title;
     }
+  }
+  return res.send();
+});
 
-    projects.push(project);
+server.delete("/projects/:id", verifyId, (req, res) => {
+  const { id } = req.params;
 
-    return res.json(projects);
+  var index = projects.findIndex(project => project.id === id);
 
+  projects.splice(index, 1);
 
-})
-
-server.get('/projects', (req,res) => {
-    return res.json(projects);
-})
-
-server.put('/projects/:id',(req,res)=> {
-    const {id} = req.params;
-    const {title} = req.body;
-
-    for(projeto of projects){
-        if(projeto.id === id){
-            projeto.title = title;
-        }
-    }
-    return res.send();
-})
-
-server.delete('/projects/:id', (req,res)=>{
-    
-})
-
-
-
-server.listen(12345);
+  return res.send();
+});
+server.listen(12346);
