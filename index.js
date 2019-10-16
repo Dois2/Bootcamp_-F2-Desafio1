@@ -25,9 +25,21 @@ function verifyId(req, res, next) {
   } else return res.status(400).send({ Error: "Projeto não encontrado" });
 }
 
+function verifyDuplicatedId(req, res, next) {
+  const { id } = req.body;
+  const index = projects.findIndex(project => project.id === id);
+  if (index !== -1) {
+    return res
+      .status(400)
+      .send({ Error: "Já existe um projeto com o mesmo ID!" });
+  } else {
+    next();
+  }
+}
+
 // Routes
 
-server.post("/projects", (req, res) => {
+server.post("/projects", verifyDuplicatedId, (req, res) => {
   const { id, title } = req.body;
 
   const project = {
